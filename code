@@ -1,0 +1,76 @@
+**This Stata do file will create a version of a financial wellbeing scale using the 2018 NFCS data.
+* it can be adapted for prior years NFCS as well
+* see also \\https://www.usfinancialcapability.org/downloads.php
+
+** FWB-P
+
+** install user written command by Abt Assoc Austin Nichols
+** see https://ideas.repec.org/c/boc/bocode/s458353.html
+
+ssc install pfwb
+
+* generate variables required
+
+rename J1 fin_sat
+**Fin satisfaction, Because of my money situation...**
+gen pfwb1_17=4 if fin_sat==10|fin_sat==9
+replace pfwb1_17=3 if fin_sat==8|fin_sat==7
+replace pfwb1_17=2 if fin_sat==6|fin_sat==5
+replace pfwb1_17=1 if fin_sat==3|fin_sat==4
+replace pfwb1_17=0 if fin_sat==1|fin_sat==2
+
+
+rename J3 fin_bal
+**Money left over at the end of the month, expenses<>=income**
+gen pfwb2_5=4 if fin_bal==1
+replace pfwb2_5=0 if fin_bal==2
+replace pfwb2_5=2 if fin_bal==3
+
+
+rename G23 debt_toomuch
+**Finances control my life==too much debt?**
+gen pfwb2_2=4 if debt_toomuch==1
+replace pfwb2_2=3 if debt_toomuch==2|debt_toomuch==3
+replace pfwb2_2=2 if debt_toomuch==4
+replace pfwb2_2=1 if debt_toomuch==6|debt_toomuch==5
+replace pfwb2_2=0 if debt_toomuch==7
+
+
+rename J4 fin_diff
+**Concerned money I have won't last=> how difficult is it for you to cover your expenses....
+gen pfwb1_13=.								
+replace pfwb1_13=0 if fin_diff==1
+replace pfwb1_13=2 if fin_diff==2
+replace pfwb1_13=4 if fin_diff==3
+
+
+rename J20 fin_2k
+**Emergency Savings=just getting by financially
+gen pfwb1_5=4 if fin_2k==1
+replace  pfwb1_5=3 if fin_2k==2
+replace  pfwb1_5=1 if fin_2k==3
+replace  pfwb1_5=0  if fin_2k==4
+
+** Use if creating from raw data
+/*
+rename qfwb1_3 fwb1_exp
+rename qfwb1_5 fwb2_getby
+rename qfwb1_8 fwb3_secure
+rename qfwb1_13 fwb4_concern
+rename qfwb1_17 fwb5_never
+rename qfwb1_19 fwb6_enjoy
+rename qfwb2_1 fwb7_behind
+rename qfwb2_2 fwb8_control
+rename qfwb2_4 fwb9_strain
+rename qfwb2_5 fwb10_left
+*/
+
+
+replace fwb8_control=pfwb2_2
+replace fwb10_left=pfwb1_13
+replace fwb2_getby=pfwb1_5
+replace fwb5_never=pfwb1_17
+replace fwb4_concern=pfwb2_5
+
+** Generates IRT scored metric. This command will take some time to run!
+pfwb PseudFWB3
